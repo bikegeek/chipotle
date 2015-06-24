@@ -1,0 +1,68 @@
+---
+title: "chipotle.Rmd"
+author: "minnawin"
+date: "June 21, 2015"
+output: html_document
+---
+Data from GrubHub for Chipotle Restaurant order.July-December 2012 for Washington, D.C. and East Lansing, MI.  Data provided by the *The New York Times*, for the article *"At Chipotle, How Many Calories Do People Really Eat"*        
+------
+
+***
+```{r read_and_process,echo=FALSE}
+      #library(dplyr)
+      library(reshape2)
+      ##Read and Process Data
+      df <- read.csv("./orders.tsv",sep="\t")
+      #print(head(df,10))
+      #print(tail(df,10))
+     # print(names(df))
+
+      #Convert item_price from char string to float, first remove the $
+      prices <- gsub("\\$","",df$item_price)
+      df$item_price<-as.numeric(prices)
+```
+
+####**Total in sales for this data: $**`r format(sum(df$item_price), digits=12,decimal.mark=".",big.mark=", ", small.mark=".", small.interval=3)`  
+
+****
+```{r most_ordered}
+    #Most ordered item
+    items.factors <- factor(df$item_name)
+    ux <- unique(items.factors)
+    most.ordered <-ux[which.max(tabulate(match(items.factors,ux)))]
+```
+
+####**Most ordered item for this study: **  *`r most.ordered`*
+
+****
+```{r avg_num_items}
+    #Average number of items per order
+    melted.df <- melt(df,id=c("order_id"),measure=c("quantity"))
+    sum.quantity.by.orderid <- dcast(melted.df, order_id ~ variable,sum)
+
+    #Now get the average of all the quantities over the order_ids
+    average.order.qty <- mean(sum.quantity.by.orderid$quantity)
+```  
+
+
+####**Average number of items per order** *(i.e. how many things make up a typical order)*:  `r format(average.order.qty,digits=2,nsmall=2 )`
+
+****
+```{r avg_order_total}
+   #First, calculate each order total
+   melted.order.cost <- melt(df,id=c("order_id"),measure=c("item_price"))
+   sum.order.totals <- dcast(melted.order.cost, order_id ~ variable, sum )
+   avg.order.totals <- mean(sum.order.totals$item_price)
+
+```    
+
+####**Average total for order:** $ `r format(avg.order.totals,digits=2,nsmall=2)`
+
+****
+Determine how many vegetarian-based/veggie-based items are selected/ordered
+```{r veggie}
+   #subset the data frame based on any item_name that looks like "veg", "VEG"...
+   
+```
+
+
